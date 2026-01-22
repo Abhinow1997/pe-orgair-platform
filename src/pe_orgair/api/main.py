@@ -8,11 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import structlog
 
-from pe_orgair.config.settings import settings
+from fastapi import Depends, HTTPException 
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
+from typing import Optional
+
+from src.pe_orgair.config.settings import settings
 from pe_orgair.api.routes.v1 import router as v1_router
 from pe_orgair.api.routes.v2 import router as v2_router
 # from pe_orgair.api.routes import health
 # from pe_orgair.observability.setup import setup_tracing, setup_logging
+
+logger = structlog.get_logger()
+
+import redis
+import httpx
+import json 
+redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+CACHE_TTL = 30  # Cache time-to-live in seconds
 
 logger = structlog.get_logger()
 
@@ -96,6 +109,57 @@ def create_app() -> FastAPI:
         else:
             return {"message": f"Hello, {user.name}! Welcome to adulthood."}
 
+
+
+    @app.get("/entries/no-cache", tags=["External API"])
+    def get_entries_no_cache():
+        """GET: Fetch from external API WITHOUT caching."""
+        start = time.perf_counter()
+        
+        with httpx.Client() as client:
+            response = client.get("https://api.nationalize.io/?name=nathaniel")
+            data = response.json()
+        
+        duration_ms = (time.perf_counter() - start) * 1000
+        logger.info("entries_no_cache", duration_ms=round(duration_ms, 2))
+        
+        return data
+
+    @app.get("/entries", tags=["External API"])
+    def get_entries_with_cache():
+        """GET: Fetch from external API WITH Redis caching."""
+        cache_key = "entries"
+        start = time.perf_counter()
+        
+        # Check cache first
+        cached_data = redis_client.get(cache_key)
+        
+        if cached_data:
+            # CACHE HIT
+            duration_ms = (time.perf_counter() - start) * 1000
+            logger.info("entries_cache_hit", duration_ms=round(duration_ms, 2))
+            return json.loads(cached_data)
+        
+        # CACHE MISS - Fetch from external API
+        logger.info("entries_cache_miss")
+        
+        with httpx.Client() as client:
+            response = client.get("https://api.nationalize.io/?name=nathaniel")
+            data = response.json()
+        
+        # Store in Redis
+        redis_client.set(cache_key, json.dumps(data), ex=CACHE_TTL)
+        
+        duration_ms = (time.perf_counter() - start) * 1000
+        logger.info("entries_fetched_from_api", duration_ms=round(duration_ms, 2))
+        
+        return data
+
+    @app.delete("/entries/cache", tags=["External API"])
+    def clear_entries_cache():
+        """DELETE: Clear the entries cache."""
+        deleted = redis_client.delete("entries")
+        return {"message": "Cache cleared", "keys_deleted": deleted}
 
     from pe_orgair.models.item import Item 
     items_db = []
