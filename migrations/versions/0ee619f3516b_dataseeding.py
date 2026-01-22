@@ -21,7 +21,6 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.execute("""
-               -- Seed PE Org-AI-R Sectors
 INSERT INTO focus_groups (focus_group_id, platform, group_name, group_code, display_order) VALUES
     ('pe_manufacturing', 'pe_org_air', 'Manufacturing', 'MFG', 1),
     ('pe_financial_services', 'pe_org_air', 'Financial Services', 'FIN', 2),
@@ -31,7 +30,6 @@ INSERT INTO focus_groups (focus_group_id, platform, group_name, group_code, disp
     ('pe_energy', 'pe_org_air', 'Energy & Utilities', 'ENR', 6),
     ('pe_professional_services', 'pe_org_air', 'Professional Services', 'PS', 7);
 
--- Seed Dimensions
 INSERT INTO dimensions (dimension_id, platform, dimension_name, dimension_code, display_order) VALUES
     ('pe_dim_data_infra', 'pe_org_air', 'Data Infrastructure', 'data_infrastructure', 1),
     ('pe_dim_governance', 'pe_org_air', 'AI Governance', 'ai_governance', 2),
@@ -40,7 +38,7 @@ INSERT INTO dimensions (dimension_id, platform, dimension_name, dimension_code, 
     ('pe_dim_leadership', 'pe_org_air', 'Leadership', 'leadership', 5),
     ('pe_dim_use_cases', 'pe_org_air', 'Use Case Portfolio', 'use_case_portfolio', 6),
     ('pe_dim_culture', 'pe_org_air', 'Culture', 'culture', 7);
-    -- Manufacturing (emphasis: data infra, tech stack, use cases)
+
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_manufacturing', 'pe_dim_data_infra', 0.22, 'OT/IT integration critical'),
@@ -51,7 +49,7 @@ weight_rationale) VALUES
 ('pe_manufacturing', 'pe_dim_use_cases', 0.14, 'Clear ROI in operations'),
 ('pe_manufacturing', 'pe_dim_culture', 0.07, 'Safety culture > innovation');
 
--- Financial Services (emphasis: governance, talent)
+
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_financial_services', 'pe_dim_data_infra', 0.16, 'Mature infrastructure'),
@@ -62,7 +60,7 @@ weight_rationale) VALUES
 ('pe_financial_services', 'pe_dim_use_cases', 0.10, 'Well-understood use cases'),
 ('pe_financial_services', 'pe_dim_culture', 0.08, 'Risk-averse by design');
 
--- Healthcare (emphasis: governance, data, leadership)
+
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_healthcare', 'pe_dim_data_infra', 0.20, 'EHR integration critical'),
@@ -73,7 +71,7 @@ weight_rationale) VALUES
 ('pe_healthcare', 'pe_dim_use_cases', 0.10, 'Long validation cycles'),
 ('pe_healthcare', 'pe_dim_culture', 0.06, 'Evidence-based culture exists');
 
--- Technology (emphasis: talent, tech stack, use cases)
+
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_technology', 'pe_dim_data_infra', 0.15, 'Assumed competent'),
@@ -84,7 +82,7 @@ weight_rationale) VALUES
 ('pe_technology', 'pe_dim_use_cases', 0.15, 'Product innovation'),
 ('pe_technology', 'pe_dim_culture', 0.05, 'Innovation assumed');
 
--- Retail & Consumer (emphasis: data, use cases)
+
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_retail', 'pe_dim_data_infra', 0.20, 'Customer data platforms'),
@@ -95,7 +93,6 @@ weight_rationale) VALUES
 ('pe_retail', 'pe_dim_use_cases', 0.18, 'Clear revenue impact'),
 ('pe_retail', 'pe_dim_culture', 0.07, 'Customer-centric exists');
 
--- Energy & Utilities (emphasis: data, tech stack, use cases)
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_energy', 'pe_dim_data_infra', 0.22, 'SCADA/OT data critical'),
@@ -106,7 +103,6 @@ weight_rationale) VALUES
 ('pe_energy', 'pe_dim_use_cases', 0.15, 'Clear operational value'),
 ('pe_energy', 'pe_dim_culture', 0.05, 'Safety culture paramount');
 
--- Professional Services (emphasis: talent, leadership)
 INSERT INTO focus_group_dimension_weights (focus_group_id, dimension_id, weight,
 weight_rationale) VALUES
 ('pe_professional_services', 'pe_dim_data_infra', 0.14, 'Document-centric'),
@@ -117,7 +113,6 @@ weight_rationale) VALUES
 ('pe_professional_services', 'pe_dim_use_cases', 0.12, 'Client + internal'),
 ('pe_professional_services', 'pe_dim_culture', 0.08, 'Innovation varies');
                
-               -- migrations/versions/002c_seed_calibrations.sql
 INSERT INTO focus_group_calibrations (focus_group_id, parameter_name, parameter_value,
 parameter_type, description) VALUES
 -- Manufacturing
@@ -162,4 +157,16 @@ parameter_type, description) VALUES
 
 def downgrade() -> None:
     """Downgrade schema."""
-    pass
+    op.execute("""
+    DELETE FROM focus_group_calibrations WHERE focus_group_id IN
+    ('pe_manufacturing', 'pe_financial_services', 'pe_healthcare',
+     'pe_technology', 'pe_retail', 'pe_energy', 'pe_professional_services');
+
+    DELETE FROM focus_group_dimension_weights WHERE focus_group_id IN
+    ('pe_manufacturing', 'pe_financial_services', 'pe_healthcare',
+     'pe_technology', 'pe_retail', 'pe_energy', 'pe_professional_services');
+
+    DELETE FROM dimensions WHERE platform = 'pe_org_air';
+
+    DELETE FROM focus_groups WHERE platform = 'pe_org_air';
+    """)
