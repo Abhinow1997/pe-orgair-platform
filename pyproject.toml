@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "pe_orgair_platform", from = "src"}]
+packages = [{include = "pe_orgair", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -13,7 +13,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Optional
 
-from src.pe_orgair.config.settings import settings
+from pe_orgair.config.settings import settings
 from pe_orgair.api.routes.v1 import router as v1_router
 from pe_orgair.api.routes.v2 import router as v2_router
 # from pe_orgair.api.routes import health
