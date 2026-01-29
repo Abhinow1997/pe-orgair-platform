@@ -1,0 +1,15 @@
+============================================================
+SEC EDGAR Pipeline Summary Report
+============================================================
+
+Attempted downloads: 1
+Unique filings processed: 1
+Duplicates skipped: 0
+Parsing errors: 0
+Total chunks created: 47
+
+============================================================
+Filing Details
+============================================================
+
+CIK: 0000320193, Type: 10-K, Acc #: 0000320193-25-000079, Status: success
