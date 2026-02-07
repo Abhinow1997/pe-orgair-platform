@@ -30,7 +30,8 @@ dependencies = [
     "pymupdf (>=1.26.7,<2.0.0)",
     "tqdm (>=4.67.1,<5.0.0)",
     "pdfkit (>=1.0.0,<2.0.0)",
-    "pyrate-limiter (==3.9.0)"
+    "pyrate-limiter (==3.9.0)",
+    "uv (>=0.10.0,<0.11.0)"
 ]
 
 [tool.poetry]

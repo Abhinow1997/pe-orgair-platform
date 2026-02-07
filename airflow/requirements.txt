@@ -1,0 +1,6 @@
+apache-airflow-providers-snowflake
+apache-airflow-providers-amazon
+beautifulsoup4
+pandas
+requests
+python-jobspy
