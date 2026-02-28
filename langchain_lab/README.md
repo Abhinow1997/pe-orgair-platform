@@ -1,0 +1,136 @@
+diff --git a/d:\SpringBigData\Lab8\pe-orgair-platform\langchain_lab\chain-capstone\README.md b/d:\SpringBigData\Lab8\pe-orgair-platform\langchain_lab\chain-capstone\README.md
+deleted file mode 100644
+--- a/d:\SpringBigData\Lab8\pe-orgair-platform\langchain_lab\chain-capstone\README.md
++++ /dev/null
+@@ -1,131 +0,0 @@
+-# PE-OrgAIR: AI Readiness Analysis Agent
+-
+-> LangChain + Claude + SerpAPI + FastAPI + Streamlit
+-
+-An intelligent agent that analyzes SEC filings to score a company's AI readiness using the PE-OrgAIR framework (7 dimensions, rubric-based scoring, 0-100 scale).
+-
+----
+-
+-## Prerequisites
+-
+-- Python 3.10+
+-- [Anthropic API Key](https://console.anthropic.com/) (required)
+-- [SerpAPI Key](https://serpapi.com/) (optional — enables web search)
+-
+-## Project Structure
+-
+-```
+-09-capstone/
+-├── backend/
+-│   └── main.py              # FastAPI + LangChain Agent
+-├── frontend/
+-│   └── app.py               # Streamlit UI
+-├── .env                      # API keys (create this)
+-├── requirements.txt
+-└── README.md
+-```
+-
+----
+-
+-## Setup
+-
+-### 1. Install Dependencies
+-
+-```bash
+-pip install fastapi uvicorn langchain langchain-anthropic langchain-core python-dotenv pydantic streamlit requests google-search-results
+-```
+-
+-### 2. Create `.env` File
+-
+-Create a `.env` file in the project root:
+-
+-```env
+-ANTHROPIC_API_KEY=sk-ant-your-key-here
+-SERPAPI_API_KEY=your-serpapi-key-here
+-```
+-
+-> **Note:** SerpAPI is optional. The agent works without it — it just skips the web search step and analyzes only the filing text.
+-
+----
+-
+-## Run the Backend
+-
+-```bash
+-cd backend
+-uvicorn main:app --reload
+-```
+-
+-- API runs at: **http://localhost:8000**SERPAPI_API_KEY
+-- API docs (Swagger): **http://localhost:8000/docs**
+-- Health check: **http://localhost:8000/health**
+-
+-### Quick Test (without frontend)
+-
+-```bash
+-curl http://localhost:8000/health
+-```
+-
+-Expected response:
+-```json
+-{"status": "ok", "serpapi_configured": true, "timestamp": "..."}
+-```
+-
+----
+-
+-## Run the Frontend
+-
+-Open a **second terminal**:
+-
+-```bash
+-cd frontend
+-streamlit run app.py
+-```
+-
+-- App runs at: **http://localhost:8501**
+-- The sidebar shows backend connection status (green = connected)
+-
+----
+-
+-## How to Use
+-
+-1. Enter a company name (e.g., "NVIDIA", "JPMorgan Chase")
+-2. Paste relevant SEC filing text (10-K, 10-Q, or 8-K sections)
+-3. Select analysis type in the sidebar (Full / Quick / Risk Only)
+-4. Click **🚀 Analyze AI Readiness**
+-5. Watch the agent execute tools in real-time:
+-   - 🔧 `search_company_news` → Web search for current AI news
+-   - 🔧 `extract_ai_initiatives` → Identifies AI projects and investments
+-   - 🔧 `extract_risk_factors` → Finds regulatory, competitive, and technical risks
+-   - 🔧 `calculate_readiness_score` → Scores across 7 PE-OrgAIR dimensions
+-   - 🔧 `final_answer` → Packages the structured result
+-6. Review results across three tabs: Scores, Details, Raw JSON
+-
+----
+-
+-## Troubleshooting
+-
+-| Issue | Fix |
+-|---|---|
+-| `ValidationError: api_key - Input should be a valid string` | `.env` file missing or `ANTHROPIC_API_KEY` not set |
+-| `Cannot connect to backend` | Make sure `uvicorn main:app --reload` is running in a separate terminal |
+-| `startswith first arg must be bytes` | Update `iter_lines()` to `iter_lines(decode_unicode=True)` |
+-| `Connection refused on port 8000` | Backend not running, or another process using port 8000 |
+-| SerpAPI not working | Check `SERPAPI_API_KEY` in `.env` — agent still works without it |
+-| Timeout after 180s | Claude API may be slow — try again, or reduce filing text length |
+-
+----
+-
+-## Tech Stack
+-
+-| Layer | Technology | Purpose |
+-|---|---|---|
+-| LLM | Claude (Anthropic) | Reasoning, tool selection, extraction |
+-| Framework | LangChain 0.3.x | Prompt templates, tool binding, LCEL |
+-| Web Search | SerpAPI (Google) | Current company news and context |
+-| Backend | FastAPI + Uvicorn | REST API with SSE streaming |
+-| Frontend | Streamlit | Interactive UI with real-time updates |
+-| Streaming | Server-Sent Events | Real-time agent status to frontend |
+-
+----
+-
+-*Built for SpringBigData — Big Data and Intelligent Analytics (Spring 2026)*
